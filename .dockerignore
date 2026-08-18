@@ -1,0 +1,9 @@
+model/
+model_photoroom/
+ComfyUI/
+*.png
+*.ipynb
+*.7z
+__pycache__/
+.cache/
+.git/

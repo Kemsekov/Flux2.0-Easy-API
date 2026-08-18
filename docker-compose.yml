@@ -1,0 +1,25 @@
+services:
+  flux-fp8:
+    build:
+      context: .
+      args:
+        http_proxy: ${WSL_PROXY:-}
+        https_proxy: ${WSL_PROXY:-}
+        no_proxy: localhost,127.0.0.1
+    image: flux-fp8-service:latest
+    container_name: flux-fp8-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

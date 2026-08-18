@@ -1,0 +1,25 @@
+# models
+model/
+model_photoroom/
+model_small_decoder/
+
+# images
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# notebooks / archives
+*.ipynb
+*.7z
+
+# misc
+.cache/
+*.log
+.DS_Store

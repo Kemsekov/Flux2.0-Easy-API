@@ -1,0 +1,34 @@
+# Versions captured from the working venv (pip freeze), see README.
+#
+# torch is intentionally NOT pinned here: it must be installed from the
+# PyTorch cu130 index to get sm_120 (RTX 50 series) kernels, see Dockerfile:
+#   pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cu130
+# triton is also omitted: the version shipped by the torch wheel is required.
+
+accelerate==1.13.0
+anyio==3.7.1
+fastapi==0.104.1
+filelock==3.18.0
+fsspec==2025.7.0
+Jinja2==3.1.6
+kornia==0.8.3
+mpmath==1.3.0
+networkx==3.5
+numpy==1.26.2
+peft==0.20.0
+pillow==12.3.0
+pydantic==2.5.0
+python-multipart==0.0.20
+PyYAML==6.0.1
+regex==2026.3.32
+requests==2.32.4
+safetensors==0.8.0
+sdnq==0.2.4
+starlette==0.27.0
+sympy==1.14.0
+tokenizers==0.22.2
+transformers==5.15.0
+typing_extensions==4.14.1
+uvicorn==0.24.0
+huggingface-hub==1.28.0
+diffusers @ https://github.com/huggingface/diffusers/archive/a00d536450c6cb83824366f4b4d22426cba9165c.tar.gz

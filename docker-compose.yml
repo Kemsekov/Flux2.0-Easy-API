@@ -2,18 +2,11 @@ services:
   flux-q4:
     build:
       context: .
-      args:
-        http_proxy: ${WSL_PROXY:-}
-        https_proxy: ${WSL_PROXY:-}
-        no_proxy: localhost,127.0.0.1
     image: flux-q4-service:latest
     container_name: flux-q4-service
-    ports:
-      - "8000:8000"
+    network_mode: host
     volumes:
       - .:/app
-      - ../model:/app/model
-      - ../text_encoder:/app/text_encoder
     environment:
       - HF_HUB_OFFLINE=1
       - TRANSFORMERS_OFFLINE=1

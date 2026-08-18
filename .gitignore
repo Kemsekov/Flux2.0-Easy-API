@@ -24,3 +24,5 @@ venv/
 .cache/
 *.log
 .DS_Store
+model9b/
+text_encoder9b/

@@ -8,16 +8,12 @@ import torch
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from PIL import Image
-from transformers import Qwen2Tokenizer
 
+import sdnq  # noqa: F401
 from diffusers import Flux2KleinPipeline
-
-from text_encoder_llama import LlamaQwen3TextEncoder
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.environ.get("FLUX_MODEL_DIR", os.path.join(HERE, "model"))
-TEXT_ENCODER_DIR = os.environ.get("FLUX_TEXT_ENCODER_DIR", os.path.join(HERE, "text_encoder"))
-GGUF_FILE = os.environ.get("FLUX_TEXT_ENCODER_GGUF", "flux2-klein-4b-uncensored-q4_k_m.gguf")
 
 DTYPE = torch.bfloat16
 MODEL_ID = "FLUX.2-klein-4B-SDNQ-4bit-dynamic"
@@ -35,19 +31,8 @@ def vram_gb():
 
 
 def build_pipeline():
-    print("[service] loading tokenizer ...", flush=True)
-    tokenizer = Qwen2Tokenizer.from_pretrained(os.path.join(MODEL_DIR, "tokenizer"))
-
-    print("[service] loading Qwen3-4B text encoder GGUF (llama.cpp, native q4, ~2.5 GB VRAM) ...", flush=True)
-    text_encoder = LlamaQwen3TextEncoder(
-        model_path=os.path.join(TEXT_ENCODER_DIR, GGUF_FILE),
-        tokenizer=tokenizer,
-    )
-
-    print("[service] loading SDNQ 4-bit transformer + VAE ...", flush=True)
-    pipe = Flux2KleinPipeline.from_pretrained(
-        MODEL_DIR, text_encoder=text_encoder, tokenizer=tokenizer, torch_dtype=DTYPE
-    )
+    print("[service] loading SDNQ 4-bit pipeline (transformer + text encoder + VAE) ...", flush=True)
+    pipe = Flux2KleinPipeline.from_pretrained(MODEL_DIR, torch_dtype=DTYPE)
     pipe.to("cuda")
     pipe.set_progress_bar_config(disable=True)
     print("[service] ready. vram:", vram_gb(), flush=True)
@@ -107,12 +92,10 @@ async def generate(
 
     def run():
         with _lock:
-            prompt_embeds = _pipe.text_encoder.encode_prompt(prompt)
             try:
                 result = _pipe(
                     image=images or None,
-                    prompt=None,
-                    prompt_embeds=prompt_embeds,
+                    prompt=prompt,
                     height=height,
                     width=width,
                     guidance_scale=guidance,

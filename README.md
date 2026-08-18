@@ -11,19 +11,39 @@ an image rebuild — just restart the container.
 
 ## 1. Download models
 
-Two sources are needed:
+Three sources are needed:
 
-### a) Pipeline components (tokenizer, Qwen3 text encoder, VAE, scheduler)
+### a) Pipeline components (tokenizer, scheduler, configs only)
+
+Download only the code/config files, excluding large weights (~8 GB saved):
 
 ```bash
 pip install -U "huggingface[hf_transfer]"
 
-# full repo is ~8 GB (text encoder). Transformer weights themselves are NOT used from this repo.
 hf download black-forest-labs/FLUX.2-klein-4B \
+    --exclude "*.bin" --exclude "*.safetensors" \
     --local-dir model
 ```
 
-### b) Diffusers-compatible fp8 transformer (Photoroom conversion)
+### b) Decoder weights
+
+Download the dedicated small decoder separately:
+
+```bash
+hf download black-forest-labs/FLUX.2-small-decoder \
+    --local-dir model/vae
+```
+
+### c) Text encoder (Qwen3 FP8)
+
+Download the community FP8 Qwen3 text encoder:
+
+```bash
+hf download q10/Qwen3-8B-Base-FP8 \
+    --local-dir model/text_encoder
+```
+
+### d) Diffusers-compatible fp8 transformer (Photoroom conversion)
 
 The BFL fp8 repo only ships a ComfyUI-format single file that `diffusers` cannot load.
 The community-standard diffusers conversion is used instead (recommended in the BFL repo's own discussion thread):
@@ -38,12 +58,12 @@ hf download Photoroom/FLUX.2-klein-4b-fp8-diffusers \
 
 ```
 flux/
-├── model/                          # black-forest-labs/FLUX.2-klein-4B (diffusers layout)
+├── model/                          # black-forest-labs/FLUX.2-klein-4B (code/configs only)
 │   ├── model_index.json
 │   ├── scheduler/
 │   ├── tokenizer/
-│   ├── text_encoder/               # Qwen3 weights (~8 GB)
-│   └── vae/
+│   ├── text_encoder/               # q10/Qwen3-8B-Base-FP8 weights
+│   └── vae/                        # black-forest-labs/FLUX.2-small-decoder weights
 ├── model_photoroom/
 │   ├── load_torchao.py
 │   ├── transformer_bf16/           # base transformer (bf16)

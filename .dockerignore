@@ -1,5 +1,6 @@
 model/
 model_photoroom/
+text_encoder/
 ComfyUI/
 *.png
 *.ipynb

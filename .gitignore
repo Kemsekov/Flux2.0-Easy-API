@@ -2,6 +2,7 @@
 model/
 model_photoroom/
 model_small_decoder/
+text_encoder/
 
 # images
 *.png

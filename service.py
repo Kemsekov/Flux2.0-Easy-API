@@ -1,3 +1,4 @@
+import gc
 import io
 import os
 import threading
@@ -108,6 +109,32 @@ async def generate(
                     num_inference_steps=steps,
                     generator=generator,
                 ).images[0]
+            except RuntimeError as e:
+                # Catch CUDA Out of Memory specifically
+                if "out of memory" in str(e).lower():
+                    print("[service] CUDA OOM encountered! Cleaning memory and retrying...", flush=True)
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    
+                    try:
+                        # Retry generation after cache flush
+                        result = _pipe(
+                            image=images or None,
+                            prompt=prompt,
+                            height=height,
+                            width=width,
+                            num_inference_steps=steps,
+                            generator=generator,
+                        ).images[0]
+                    except RuntimeError as retry_e:
+                        if "out of memory" in str(retry_e).lower():
+                            print("[service] CUDA OOM failed on retry as well.", flush=True)
+                            raise HTTPException(507, "CUDA Out of Memory on generation retry. Downscale your image size.")
+                        raise HTTPException(500, f"Runtime error during generation retry: {str(retry_e)}")
+                    except ValueError as retry_val_e:
+                        raise HTTPException(400, str(retry_val_e))
+                else:
+                    raise HTTPException(500, f"Runtime error during generation: {str(e)}")
             except ValueError as e:
                 raise HTTPException(400, str(e))
         buf = io.BytesIO()

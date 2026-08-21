@@ -2,14 +2,11 @@ import io
 import os
 import threading
 from contextlib import asynccontextmanager
-
 import anyio
 import torch
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from PIL import Image
-
-import sdnq  # noqa: F401
 from diffusers import Flux2KleinPipeline
 from sdnq.common import use_torch_compile as triton_is_available
 from sdnq.loader import apply_sdnq_options_to_model

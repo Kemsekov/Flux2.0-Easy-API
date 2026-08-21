@@ -1,3 +1,8 @@
 pip install -r requirements.txt
-pip freeze | grep torch
-# python -m uvicorn service:app --host 0.0.0.0 --port 8000
+if [ ! -f "/root/.cache/pip/diffusers.tar.gz" ]; then
+    wget -O /root/.cache/pip/diffusers.tar.gz https://github.com/huggingface/diffusers/archive/a00d536450c6cb83824366f4b4d22426cba9165c.tar.gz
+fi
+pip install /root/.cache/pip/diffusers.tar.gz
+
+pip freeze
+python -m uvicorn service:app --host 0.0.0.0 --port 8000

@@ -12,11 +12,10 @@ def generate(
     width=None,
     steps=4,
     seed=None,
-    guidance=1.0,
     base_url="http://localhost:8000",
 ):
     files = []
-    data = {"prompt": prompt, "steps": steps, "guidance": guidance}
+    data = {"prompt": prompt, "steps": steps}
     if height is not None:
         data["height"] = height
     if width is not None:
@@ -50,12 +49,11 @@ if __name__ == "__main__":
     ap.add_argument("--width", type=int)
     ap.add_argument("--steps", type=int, default=4)
     ap.add_argument("--seed", type=int)
-    ap.add_argument("--guidance", type=float, default=1.0)
     ap.add_argument("--url", default="http://localhost:8000")
     ap.add_argument("--out", default="out.png")
     a = ap.parse_args()
 
     imgs = [p for p in (a.image, a.image2) if p]
-    img, seed = generate(a.prompt, imgs, a.height, a.width, a.steps, a.seed, a.guidance, a.url)
+    img, seed = generate(a.prompt, imgs, a.height, a.width, a.steps, a.seed, a.url)
     img.save(a.out)
     print(f"saved {a.out} ({img.width}x{img.height}, seed={seed})")

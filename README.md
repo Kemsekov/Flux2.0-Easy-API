@@ -98,7 +98,6 @@ venv/bin/uvicorn service:app --host 0.0.0.0 --port 8000
 | `height` / `width` | int | `null` | output size; derived from input image when omitted; must be divisible by 16 |
 | `steps` | int | `4` | distilled model, 4 steps recommended |
 | `seed` | int | random | returned in `X-Seed` response header |
-| `guidance` | float | `1.0` | ignored: pipeline is distilled (`is_distilled=true`) |
 
 Examples:
 
@@ -172,5 +171,5 @@ transformers from `model/text_encoder` with its SDNQ quantization config (regist
 - Tested on NVIDIA GeForce RTX 5070 Laptop GPU (8 GB VRAM), driver 580.173.02 (CUDA 13.0).
 - VRAM after model load ~5.5 GB; a 256x256 generation peaks at ~6 GB.
 - The distilled model runs 4-step inference; expect roughly 5-15 s per image depending on size.
-- SDNQ layers are dequantized per-forward with plain bf16 matmuls (`use_quantized_matmul=False`,
-  the checkpoint default).
+- SDNQ INT8 matmul is enabled at startup when triton is available (`use_quantized_matmul=True`),
+  applied to the transformer and text encoder; falls back to per-forward bf16 dequant otherwise.

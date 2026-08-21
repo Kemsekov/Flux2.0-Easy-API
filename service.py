@@ -11,6 +11,8 @@ from PIL import Image
 
 import sdnq  # noqa: F401
 from diffusers import Flux2KleinPipeline
+from sdnq.common import use_torch_compile as triton_is_available
+from sdnq.loader import apply_sdnq_options_to_model
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.environ.get("FLUX_MODEL_DIR", os.path.join(HERE, "model"))
@@ -34,6 +36,15 @@ def build_pipeline():
     print("[service] loading SDNQ 4-bit pipeline (transformer + text encoder + VAE) ...", flush=True)
     pipe = Flux2KleinPipeline.from_pretrained(MODEL_DIR, torch_dtype=DTYPE)
     pipe.to("cuda")
+
+    # Enable INT8 MatMul for AMD, Intel ARC and Nvidia GPUs:
+    if triton_is_available and (torch.cuda.is_available() or torch.xpu.is_available()):
+        pipe.transformer = apply_sdnq_options_to_model(pipe.transformer, use_quantized_matmul=True)
+        pipe.text_encoder = apply_sdnq_options_to_model(pipe.text_encoder, use_quantized_matmul=True)
+        print("[service] SDNQ INT8 matmul enabled", flush=True)
+    else:
+        print("[service] SDNQ INT8 matmul disabled (triton not available)", flush=True)
+    # pipe.enable_model_cpu_offload()
     pipe.set_progress_bar_config(disable=True)
     print("[service] ready. vram:", vram_gb(), flush=True)
     return pipe
@@ -68,7 +79,6 @@ async def generate(
     width: int | None = Form(None),
     steps: int = Form(4),
     seed: int | None = Form(None),
-    guidance: float = Form(1.0),
 ):
     if _pipe is None:
         raise HTTPException(503, "model still loading")
@@ -98,7 +108,6 @@ async def generate(
                     prompt=prompt,
                     height=height,
                     width=width,
-                    guidance_scale=guidance,
                     num_inference_steps=steps,
                     generator=generator,
                 ).images[0]

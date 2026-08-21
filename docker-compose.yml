@@ -7,9 +7,19 @@ services:
     network_mode: host
     volumes:
       - .:/app
+      - ./.triton_cache:/root/.triton/cache
     environment:
+      # Offline Configurations
       - HF_HUB_OFFLINE=1
       - TRANSFORMERS_OFFLINE=1
+      
+      # Triton Cache & JIT Compilation Accelerators
+      - TRITON_CACHE_DIR=/root/.triton/cache
+      - TRITON_COMPILE_NUM_THREADS=8
+      
+      # Memory Allocator Tweaks (Prevents First-Run Autotuner OOMs)
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,max_split_size_mb:128
+  
     deploy:
       resources:
         reservations:

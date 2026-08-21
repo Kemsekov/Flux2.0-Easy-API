@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # triton JIT compiles kernels at inference time and needs a C compiler
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && apt-get install -y --no-install-recommends gcc libc6-dev wget git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

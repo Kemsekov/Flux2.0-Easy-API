@@ -29,7 +29,7 @@ services:
             - driver: nvidia
               count: 'all'
               capabilities: [gpu]
-    restart: unless-stopped
+    # restart: unless-stopped
     command: 'bash run.sh'
 
 volumes:

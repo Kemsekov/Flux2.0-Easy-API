@@ -29,3 +29,4 @@ text_encoder9b/
 
 #cache
 .triton_cache/
+.pip_cache/

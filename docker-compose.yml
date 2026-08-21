@@ -8,6 +8,8 @@ services:
     volumes:
       - .:/app
       - ./.triton_cache:/root/.triton/cache
+      - ./.pip_cache:/root/.cache/pip  
+      - python_global_packages:/usr/local/lib/python3.12/site-packages/
     environment:
       # Offline Configurations
       - HF_HUB_OFFLINE=1
@@ -25,6 +27,10 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: 'all'
               capabilities: [gpu]
     restart: unless-stopped
+    command: 'bash run.sh'
+
+volumes:
+  python_global_packages: 

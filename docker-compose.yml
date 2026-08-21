@@ -4,7 +4,9 @@ services:
       context: .
     image: flux-q4-service:latest
     container_name: flux-q4-service
-    network_mode: host
+    # network_mode: host
+    ports:
+      - 8000:8000
     volumes:
       - .:/app
       - ./.triton_cache:/root/.triton/cache
